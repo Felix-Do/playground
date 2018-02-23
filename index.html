@@ -73,22 +73,68 @@ limitations under the License.
         <span class="value" id="iter-number"></span>
       </div>
       <div class="control ui-learningRate">
-        <label for="learningRate">Learning rate</label>
+        <div>
+            <label for="learningRate">Learning rate
+              <a id="LR_Minus">-</a>
+              <a id="LR_Plus">+</a>
+            </label>
+        </div>
         <div class="select">
           <select id="learningRate">
             <option value="0.00001">0.00001</option>
             <option value="0.0001">0.0001</option>
             <option value="0.001">0.001</option>
+            <option value="0.001778279">0.00178</option>
             <option value="0.003">0.003</option>
+            <option value="0.005623413">0.00562</option>
             <option value="0.01">0.01</option>
+            <option value="0.01778279">0.0178</option>
             <option value="0.03">0.03</option>
+            <option value="0.05623413">0.0562</option>
             <option value="0.1">0.1</option>
+            <option value="0.1778279">0.178</option>
             <option value="0.3">0.3</option>
+            <option value="0.5623413">0.562</option>
             <option value="1">1</option>
             <option value="3">3</option>
             <option value="10">10</option>
           </select>
         </div>
+        <script>
+          let LR_Select = document.getElementById("learningRate");
+          document.getElementById("LR_Plus").onclick = function(){
+            LR_Select_change(1);
+          };
+          document.getElementById("LR_Minus").onclick = function(){
+            LR_Select_change(-1);
+          };
+          function LR_Select_change(delta=0) {
+            let currentIndex = LR_Select.selectedIndex;
+            let newIndex = currentIndex + Math.round(+delta);
+            console.log(LR_Select.options[newIndex]);
+            // LR_Select.options[newIndex].click();
+            LR_Select.options[newIndex].selected = true;
+            return;
+            LR_Select.selectedIndex += Math.round(+delta);
+            LR_Select.onchange();
+            console.log(delta, LR_Select.value);
+            let currentValue = +LR_Select.value;
+          }
+          // let event; // The custom event that will be created
+          // if (document.createEvent) {
+          //   event = document.createEvent("HTMLEvents");
+          //   event.initEvent("change", true, true);
+          // } else {
+          //   event = document.createEventObject();
+          //   event.eventType = "change";
+          // }
+          // event.eventName = "change";
+          // if (document.createEvent) {
+          //   element.dispatchEvent(event);
+          // } else {
+          //   element.fireEvent(event.eventType, event);
+          // }
+        </script>
       </div>
       <div class="control ui-activation">
         <label for="activations">Activation</label>
@@ -98,6 +144,8 @@ limitations under the License.
             <option value="tanh">Tanh</option>
             <option value="sigmoid">Sigmoid</option>
             <option value="linear">Linear</option>
+            <option value="lrelu">L_ReLU</option>
+            <option value="elu">ELU</option>
           </select>
         </div>
       </div>
@@ -154,6 +202,15 @@ limitations under the License.
           <div class="dataset" title="Circle">
             <canvas class="data-thumbnail" data-dataset="circle"></canvas>
           </div>
+          <!-- <div class="dataset" title="Donut">
+            <canvas class="data-thumbnail" data-dataset="donut"></canvas>
+          </div> -->
+          <div class="dataset" title="Star">
+            <canvas class="data-thumbnail" data-dataset="star"></canvas>
+          </div>
+          <div class="dataset" title="Bullseye">
+            <canvas class="data-thumbnail" data-dataset="bullseye"></canvas>
+          </div>
           <div class="dataset" title="Exclusive or">
             <canvas class="data-thumbnail" data-dataset="xor"></canvas>
           </div>
@@ -175,7 +232,7 @@ limitations under the License.
         <div class="ui-percTrainData">
           <label for="percTrainData">Ratio of training to test data:&nbsp;&nbsp;<span class="value">XX</span>%</label>
           <p class="slider">
-            <input class="mdl-slider mdl-js-slider" type="range" id="percTrainData" min="10" max="90" step="10">
+            <input class="mdl-slider mdl-js-slider" type="range" id="percTrainData" min="5" max="95" step="5">
           </p>
         </div>
         <div class="ui-noise">
@@ -187,7 +244,7 @@ limitations under the License.
         <div class="ui-batchSize">
           <label for="batchSize">Batch size:&nbsp;&nbsp;<span class="value">XX</span></label>
           <p class="slider">
-            <input class="mdl-slider mdl-js-slider" type="range" id="batchSize" min="1" max="30" step="1">
+            <input class="mdl-slider mdl-js-slider" type="range" id="batchSize" min="5" max="120" step="5">
           </p>
         </div>
           <button class="basic-button" id="data-regen-button" title="Regenerate data">
@@ -264,11 +321,11 @@ limitations under the License.
       <h4>Output</h4>
       <div class="metrics">
         <div class="output-stats ui-percTrainData">
-          <span>Test loss</span>
+          <span>Test loss = </span>
           <div class="value" id="loss-test"></div>
         </div>
         <div class="output-stats train">
-          <span>Training loss</span>
+          <span>Training loss = </span>
           <div class="value" id="loss-train"></div>
         </div>
         <div id="linechart"></div>

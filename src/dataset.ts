@@ -137,9 +137,12 @@ export function classifySpiralData(numSamples: number, noise: number):
   let n = numSamples / 2;
 
   function genSpiral(deltaT: number, label: number) {
+    let rMax = 5.2;
+    let tMax = 2.5;
     for (let i = 0; i < n; i++) {
-      let r = i / n * 5;
-      let t = 1.75 * i / n * 2 * Math.PI + deltaT;
+      let r = (i + 1) / n * rMax;
+      // let t = 1.75 * i / n * 2 * Math.PI + deltaT;
+      let t = tMax * (i + 1) / n * 2 * Math.PI + deltaT;
       let x = r * Math.sin(t) + randUniform(-1, 1) * noise;
       let y = r * Math.cos(t) + randUniform(-1, 1) * noise;
       points.push({x, y, label});
@@ -154,14 +157,18 @@ export function classifySpiralData(numSamples: number, noise: number):
 export function classifyCircleData(numSamples: number, noise: number):
     Example2D[] {
   let points: Example2D[] = [];
-  let radius = 5;
+  // let radius = 5;
+  let radius = 5.2;
+  let rSize = .4;
+  let rGap = .05;
   function getCircleLabel(p: Point, center: Point) {
-    return (dist(p, center) < (radius * 0.5)) ? 1 : -1;
+    return (dist(p, center) < (radius * rSize)) ? 1 : -1;
   }
 
   // Generate positive points inside the circle.
   for (let i = 0; i < numSamples / 2; i++) {
-    let r = randUniform(0, radius * 0.5);
+    // let r = randUniform(0, radius * 0.5);
+    let r = randUniform(0, rSize - rGap) * radius;
     let angle = randUniform(0, 2 * Math.PI);
     let x = r * Math.sin(angle);
     let y = r * Math.cos(angle);
@@ -173,7 +180,8 @@ export function classifyCircleData(numSamples: number, noise: number):
 
   // Generate negative points outside the circle.
   for (let i = 0; i < numSamples / 2; i++) {
-    let r = randUniform(radius * 0.7, radius);
+    // let r = randUniform(radius * 0.7, radius);
+    let r = randUniform(rSize + rGap, 1) * radius;
     let angle = randUniform(0, 2 * Math.PI);
     let x = r * Math.sin(angle);
     let y = r * Math.cos(angle);
@@ -182,6 +190,133 @@ export function classifyCircleData(numSamples: number, noise: number):
     let label = getCircleLabel({x: x + noiseX, y: y + noiseY}, {x: 0, y: 0});
     points.push({x, y, label});
   }
+  return points;
+}
+
+export function classifyDonutData(numSamples: number, noise: number):
+    Example2D[] {
+  let points: Example2D[] = [];
+  // let radius = 5;
+  let radius = 5;
+  let rSize = .5;
+  let rThickness = .2; // each side, actual thickness = this * 2
+  let rGap = .02;
+  
+  function getDonutLabel(p: Point, center: Point) {
+    if (dist(p, center) < (radius * (rSize - rThickness))) return -1;
+    if (dist(p, center) > (radius * (rSize + rThickness))) return -1;
+    return 1;
+  }
+
+  function genDonut(label: number) {
+    for (let i = 0; i < numSamples / 2; i++) {
+      let r = (randUniform(-1, 1) * (rThickness - rGap) + rSize) * radius;
+      if ( label < 0 ) {
+        r = (1 - randUniform(1, 0) * (rSize - rThickness - rGap * 2)) * radius;
+        if ( i < numSamples / 5 ) {
+          // points inside the inner circle of the donut
+          r = (randUniform(0, 1) * (rSize - rThickness - rGap * 2)) * radius;
+        }
+      }
+      let angle = randUniform(0, 2 * Math.PI);
+      let x = r * Math.sin(angle);
+      let y = r * Math.cos(angle);
+      let noiseX = randUniform(-radius, radius) * noise;
+      let noiseY = randUniform(-radius, radius) * noise;
+      // let label = getDonutLabel({x: x + noiseX, y: y + noiseY}, {x: 0, y: 0});
+      points.push({x, y, label});
+    }
+  }
+
+  genDonut(1);
+  genDonut(-1);
+  
+  return points;
+}
+
+export function classifyBullseyeData(numSamples: number, noise: number):
+    Example2D[] {
+  let points: Example2D[] = [];
+  let radius = 5;
+  let ringCount = 4;
+  let ringThickness = 1 / ringCount;
+  let rGapRatio = .1;
+  let rGap = ringThickness * rGapRatio;
+  
+  function getBullseyeLabel(p: Point, center: Point) {
+    let type = Math.floor((dist(p, center) / radius * ringCount + 1) % 2);
+    if ( type < 1 ) return -1;
+    return 1;
+  }
+
+  function genBullseye(ringIndex: number) {
+    if ( ringCount <= 0 ) return;
+    let label = 1;
+    let type = Math.floor((ringIndex + 1) % 2);
+    if ( type < 1 ) label = -1;
+    for (let i = 0; i < numSamples / ringCount; i++) {
+      let r = ((randUniform(rGapRatio, 1 - rGapRatio) + ringIndex) * ringThickness) * radius;
+      let angle = randUniform(0, 2 * Math.PI);
+      let x = r * Math.sin(angle);
+      let y = r * Math.cos(angle);
+      let noiseX = randUniform(-radius, radius) * noise;
+      let noiseY = randUniform(-radius, radius) * noise;
+      // let label = getBullseyeLabel({x: x + noiseX, y: y + noiseY}, {x: 0, y: 0});
+      points.push({x, y, label});
+    }
+  }
+
+  for (let i = 0; i < ringCount; i++) {
+    genBullseye(i);
+  }
+  
+  return points;
+}
+
+// WORK_IN_PROGESS
+export function classifyStarData(numSamples: number, noise: number):
+    Example2D[] {
+  let points: Example2D[] = [];
+  // let radius = 5;
+  let radius = 5.6;
+  let bladeCount = 6;
+  let bodyRatio = .5;
+  let ringCount = 4;
+  let ringThickness = 1 / ringCount;
+  let rGapRatio = .4;
+  let rGap = ringThickness * rGapRatio;
+  
+  function getStarLabel(p: Point, center: Point) {
+    return 1;
+  }
+
+  function genStar(ringIndex: number) {
+    if ( ringCount <= 0 ) return;
+    let label = 1;
+    let type = Math.floor((ringIndex + 1) % 2);
+    if ( type < 1 ) label = -1;
+    for (let i = 0; i < numSamples / ringCount; i++) {
+      let phase = randUniform(0, bladeCount);
+      let valleyA = (Math.floor(phase) % bladeCount + .5) / bladeCount * 2 * Math.PI;
+      let peakA = (Math.floor(phase + .5) % bladeCount) / bladeCount * 2 * Math.PI;
+      // let y = r * Math.cos(angle);
+      let dist = randUniform(0, 1);
+      let r = ((randUniform(rGapRatio, 1 - rGapRatio) + ringIndex) * ringThickness) * radius;
+      let x = r * (dist * bodyRatio * Math.sin(valleyA) + (1 - dist) * Math.sin(peakA));
+      let y = r * (dist * bodyRatio * Math.cos(valleyA) + (1 - dist) * Math.cos(peakA));
+      // let valleyX = 
+      // let phase = (rand * Math.round(bladeCount)) % 1 * 2;
+      let noiseX = randUniform(-radius, radius) * noise;
+      let noiseY = randUniform(-radius, radius) * noise;
+      // let label = getStarLabel({x: x + noiseX, y: y + noiseY}, {x: 0, y: 0});
+      points.push({x, y, label});
+    }
+  }
+
+  for (let i = 0; i < ringCount; i++) {
+    genStar(i);
+  }
+  
   return points;
 }
 

@@ -134,6 +134,29 @@ export class Activations {
     output: x => x,
     der: x => 1
   };
+  public static LRELU_Ratio = 1 / 25;
+  public static LRELU: ActivationFunction = {
+    output: x => {
+      if ( x >= 0 ) return x;
+      return x * Activations.LRELU_Ratio;
+    },
+    der: x => {
+      if ( x >= 0 ) return 1;
+      return Activations.LRELU_Ratio;
+    }
+  };
+  public static ELU_Ratio = 1;
+  public static ELU: ActivationFunction = {
+    output: x => {
+      if ( x >= 0 ) return x;
+      return (Math.exp(x) - 1) * Activations.ELU_Ratio;
+    },
+    der: x => {
+      if ( x >= 0 ) return 1;
+      let output = Activations.ELU.output(x);
+      return output + Activations.ELU_Ratio;
+    }
+  };
 }
 
 /** Build-in regularization functions */

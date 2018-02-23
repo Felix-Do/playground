@@ -69,6 +69,9 @@ let INPUTS: {[name: string]: InputFeature} = {
   "xTimesY": {f: (x, y) => x * y, label: "X_1X_2"},
   "sinX": {f: (x, y) => Math.sin(x), label: "sin(X_1)"},
   "sinY": {f: (x, y) => Math.sin(y), label: "sin(X_2)"},
+  "distXY": {f: (x, y) => Math.sqrt(x*x + y*y), label: "dist"},
+  "sumXY": {f: (x, y) => x + y, label: "sum"},
+  "deltaXY": {f: (x, y) => x - y, label: "delta"},
 };
 
 let HIDABLE_CONTROLS = [
@@ -875,7 +878,8 @@ function updateUI(firstStep = false) {
   }
 
   function humanReadable(n: number): string {
-    return n.toFixed(3);
+    // return n.toFixed(3);
+    return (100 * n).toFixed(2) + "%";
   }
 
   // Update loss and iteration number.
